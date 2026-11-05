@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RailQuote — UI mock</title>
+<style>
+  body{margin:0;background:#f4f6f9;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:#0f172a;font-size:13px}
+  a{color:#1d4ed8}
+  header{background:#0f172a;color:#fff;display:flex;flex-wrap:wrap;align-items:center;gap:24px;padding:0 24px;height:52px}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px}
+  .hdr-right{color:#cbd5e1;font-size:12px;display:flex;gap:14px;align-items:center;margin-left:auto}
+  .src{font-size:10px;font-weight:600;padding:1px 6px;border-radius:4px;background:#1e293b;color:#93c5fd}
+  main{max-width:1232px;width:100%;box-sizing:border-box;margin:0 auto;padding:16px 24px 32px;display:flex;flex-direction:column;gap:14px}
+  .card{background:#fff;border:1px solid #e2e8f0;border-radius:8px}
+  .counts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .count{padding:10px 14px;display:flex;align-items:baseline;gap:10px}
+  .count b{font-size:24px;font-weight:700}
+  .count span{color:#475569}
+  .cardhead{padding:10px 14px;border-bottom:1px solid #e2e8f0;font-weight:600;font-size:14px}
+  .cardhead small{color:#475569;font-weight:400;font-size:12px}
+  table{width:100%;border-collapse:collapse;min-width:900px}
+  thead tr{background:#f8fafc;color:#475569;font-size:11px;text-transform:uppercase;letter-spacing:.04em;text-align:left}
+  th{padding:8px 14px;font-weight:600}
+  td{padding:10px 14px;border-top:1px solid #e2e8f0}
+  tbody tr{cursor:pointer}
+  tbody tr:hover{background:#f8fafc}
+  .pill{border-radius:999px;padding:2px 8px;font-weight:600;font-size:12px;white-space:nowrap}
+  .p-quoted{background:#dbeafe;color:#1e40af}.p-sent{background:#dcfce7;color:#166534}.p-input{background:#fef3c7;color:#92400e}.p-wait{background:#ede9fe;color:#5b21b6}
+  .muted{color:#475569}
+  .right{text-align:right}
+  button{font:inherit;cursor:pointer}
+  .btn{padding:7px 12px;border:1px solid #cbd5e1;background:#fff;border-radius:6px;color:#0f172a;font-weight:600}
+  .btn-primary{border:0;background:#1d4ed8;color:#fff}
+  .btn-amber{border:0;background:#b45309;color:#fff}
+  .linkbtn{border:0;background:transparent;padding:0;color:#1d4ed8;font-weight:600;text-align:left}
+  .topbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .pad{padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+  .fields{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px 12px}
+  .fields small{display:block;font-size:11px;color:#475569}
+  .quoteline{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .quoteline .l{flex:1}.quoteline .v{min-width:64px;text-align:right}
+  .badge{font-size:10px;font-weight:600;letter-spacing:.03em;padding:1px 6px;border-radius:4px;white-space:nowrap}
+  .b-ours{background:#e2e8f0;color:#334155}.b-ext{background:#dbeafe;color:#1e40af}
+  .amber{color:#b45309}
+  .total{display:flex;justify-content:space-between;border-top:1px solid #e2e8f0;padding-top:6px;margin-top:2px;font-weight:700;font-size:15px}
+  .gap{background:#fffbeb;border:1px solid #fcd34d;border-radius:8px;padding:12px 14px;display:flex;flex-direction:column;gap:6px}
+  .gap h4{margin:0;font-weight:600;color:#92400e;font-size:13px}
+  .dot{width:8px;height:8px;border-radius:50%;background:#b45309;display:inline-block;margin-right:8px}
+  .email{background:#f8fafc;border-left:3px solid #cbd5e1;padding:8px 10px;color:#475569;font-size:12px;font-style:italic}
+  .msgs{padding:14px;display:flex;flex-direction:column;gap:10px;min-height:180px}
+  .row{display:flex}.row.user{justify-content:flex-end}
+  .bubble{max-width:78%;padding:9px 12px;border-radius:10px 10px 10px 2px;background:#f1f5f9;white-space:pre-line}
+  .user .bubble{max-width:70%;background:#1d4ed8;color:#fff;border-radius:10px 10px 2px 10px}
+  .mail .bubble{background:#fff;border:1px solid #c4b5fd}
+  .meta{display:flex;align-items:center;gap:6px;margin-bottom:5px;font-size:11px;color:#5b21b6;font-weight:600}
+  .tools{margin-top:6px;font-size:11px;color:#475569}.tools code{font-family:ui-monospace,Menlo,monospace}
+  .composer{padding:10px 14px;border-top:1px solid #e2e8f0;display:flex;flex-direction:column;gap:8px}
+  .chips{display:flex;gap:6px;flex-wrap:wrap}
+  .chip{font-size:12px;padding:5px 10px;border:1px solid #cbd5e1;background:#f8fafc;border-radius:999px;color:#0f172a}
+  .inputrow{display:flex;gap:8px}
+  .inputrow input{font:inherit;flex:1;padding:10px 12px;border:1px solid #cbd5e1;border-radius:6px}
+  .hidden{display:none}
+  .wait{font-size:12px;color:#5b21b6;font-weight:600}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2" aria-hidden="true"><rect x="4" y="3" width="16" height="13" rx="3"/><path d="M4 11h16M8 16l-2 4M16 16l2 4M9 7h6"/></svg>
+    RailQuote
+  </div>
+  <div class="hdr-right">
+    <span>Agent inbox: ravi@railquote.ai</span>
+    <span>Diesel $3.89 ▲4.1% <span class="src">EIA</span></span>
+    <span>Alerts 2 <span class="src">NWS</span></span>
+    <span>Geo 1 <span class="src">GDELT</span></span>
+  </div>
+</header>
+<main id="app"></main>
+
+<script>
+// ---------- seed data ----------
+const reqs = [
+  { id:'R-1041', time:'08:12', shipper:'Midwest Grain Co', contact:'dave@midwestgrain.com', from:'Omaha, NE', to:'Houston, TX', commodity:'Corn', carType:'Covered hopper', qty:12, pickup:'Nov 13', needBy:'Nov 15', miles:915, rate:3.20, fuelPct:8, weather:1054, weatherNote:'flood watch, Kansas City', geo:0, geoNote:'none on route', marginPct:6, eta:'Nov 15', status:'Auto-quoted', missing:[],
+    email:'"…need a dozen covered hoppers out of Omaha to Houston mid next month, corn, pickup around the 13th, must land by the 15th. Thx — Dave"',
+    msgs:[{who:'agent', text:'Parsed email from Midwest Grain Co: 12 covered hoppers, Omaha → Houston, corn, pickup Nov 13, need by Nov 15.\nSignals: diesel $3.89 (+4.1% wk) → 8% fuel surcharge · flood watch near Kansas City → +$1,054 and +1 day · no geo risk.\nNothing missing, so I auto-quoted $41,280 with ETA Nov 15. Tell me to adjust anything, or say "send".', tools:'parse_email, get_signals, reprice_quote, save_request'}] },
+  { id:'R-1042', time:'08:40', shipper:'Apex Steel', contact:'ops@apexsteel.com', from:'Gary, IN', to:'Birmingham, AL', commodity:'Steel coil', carType:'Flatcar', qty:6, pickup:'Nov 10', needBy:'Nov 12', miles:690, rate:3.90, fuelPct:8, weather:0, weatherNote:'clear', geo:0, geoNote:'none on route', marginPct:6, eta:'Nov 12', status:'Sent', missing:[],
+    email:'"6 flats Gary to Birmingham, coil, out on the 10th in by the 12th. Same deal as last month please."',
+    msgs:[{who:'agent', text:'Parsed email from Apex Steel: 6 flatcars, Gary → Birmingham, steel coil, Nov 10 → Nov 12. All signals clear. Auto-quoted $18,490.', tools:'parse_email, get_signals, reprice_quote, save_request'},{who:'user', text:'looks good, send it'},{who:'agent', text:'Quote sent to ops@apexsteel.com with PDF attached. Status → Sent.', tools:'render_quote_pdf, send_email, save_request'}] },
+  { id:'R-1043', time:'09:05', shipper:'Delta Chem', contact:'dave@deltachem.com', shipperReply:'Pickup is Nov 18. They are DOT-117 cars.\n\nThanks,\nDave', from:'Baton Rouge, LA', to:'Memphis, TN', commodity:'Caustic soda', carType:'?', qty:4, pickup:'?', needBy:'Nov 20', miles:410, rate:5.10, fuelPct:8, weather:0, weatherNote:'clear', geo:0, geoNote:'none on route', marginPct:6, eta:'—', status:'Needs input', missing:['Pickup date','Tank car spec (DOT-111 or DOT-117)'],
+    email:'"Need 4 tanks of caustic to Memphis by the 20th. Fwd: Fwd: RE: [EXTERNAL] — lots of signature junk removed"',
+    msgs:[{who:'agent', text:'Parsed email from Delta Chem: 4 tank cars, Baton Rouge → Memphis, caustic soda, need by Nov 20.\nI could not quote yet. Missing: pickup date, and which tank spec (DOT-111 or DOT-117 — rate differs).\nYou can answer here if you know, or click "Ask shipper by email" and I will ask Dave and pick up his reply on this same request.', tools:'parse_email, save_request'}] },
+  { id:'R-1044', time:'09:30', shipper:'Gulf Petro Supply', contact:'logistics@gulfpetro.com', from:'Houston, TX', to:'Laredo, TX', commodity:'Lubricants', carType:'Boxcar', qty:10, pickup:'Nov 14', needBy:'Nov 18', miles:320, rate:4.10, fuelPct:8, weather:0, weatherNote:'clear', geo:0, geoNote:'border unrest — not yet applied', marginPct:6, eta:'Nov 17', status:'Needs input', missing:['Confirm geo risk premium +$1,800 and +2 days (Laredo border events)'],
+    email:'"10 boxcars Houston to Laredo for the border transfer, 14th to 18th."',
+    msgs:[{who:'agent', text:'Parsed email from Gulf Petro Supply: 10 boxcars, Houston → Laredo, Nov 14 → Nov 18.\nGeo check: GDELT shows elevated unrest events near the Laredo crossing this week. I suggest +$1,800 geo premium and +2 days ETA. I did not auto-quote because this needs a human call.\nReply "confirm" to quote with it, or "no geo" to quote without.', tools:'parse_email, get_signals, geo_risk_lookup, save_request'}] },
+  { id:'R-1045', time:'09:52', shipper:'Pine Ridge Lumber', contact:'ship@pineridge.com', from:'Portland, OR', to:'Denver, CO', commodity:'Lumber', carType:'Centerbeam', qty:8, pickup:'Nov 16', needBy:'Nov 20', miles:1260, rate:3.40, fuelPct:8, weather:620, weatherNote:'snow advisory, Portland', geo:0, geoNote:'none on route', marginPct:6, eta:'Nov 20', status:'Auto-quoted', missing:[],
+    email:'"8 centerbeams PDX to Denver, lumber, load 16th, want by the 20th."',
+    msgs:[{who:'agent', text:'Parsed email from Pine Ridge Lumber: 8 centerbeams, Portland → Denver, lumber, Nov 16 → Nov 20.\nSignals: 8% fuel surcharge · snow advisory Portland → +$620 and +1 day · no geo risk. Auto-quoted $38,440, ETA Nov 20.', tools:'parse_email, get_signals, reprice_quote, save_request'}] }
+];
+let view = 'queue', sel = null;
+
+// ---------- helpers ----------
+const money = n => '$' + Math.round(n).toLocaleString('en-US');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function quote(r){ const base=r.qty*r.miles*r.rate, fuel=base*r.fuelPct/100, sub=base+fuel+r.weather+r.geo, margin=sub*r.marginPct/100; return {base,fuel,weather:r.weather,geo:r.geo,margin,total:sub+margin}; }
+function pillClass(s){ return s==='Sent'?'p-sent':s==='Needs input'?'p-input':s==='Waiting on shipper'?'p-wait':'p-quoted'; }
+
+// ---------- the "agent": rule engine standing in for Bedrock + tools ----------
+function agent(r, text){
+  const t=text.toLowerCase(), pct=t.match(/(\d+(?:\.\d+)?)\s*%/), num=t.match(/\b(\d+)\b/);
+  const tools=[]; let reply='', changed=false;
+  if(/(fuel|fsc|surcharge)/.test(t)&&pct){ const v=parseFloat(pct[1]), old=r.fuelPct; r.fuelPct=/(add|more|extra|plus)/.test(t)?old+v:v; reply+=`Fuel surcharge ${old}% → ${r.fuelPct}%. `; tools.push('update_request','reprice_quote'); changed=true; }
+  else if(/margin/.test(t)&&pct){ const old=r.marginPct; r.marginPct=parseFloat(pct[1]); reply+=`Margin ${old}% → ${r.marginPct}%. `; tools.push('update_request','reprice_quote'); changed=true; }
+  else if(/(cars?|hoppers?|tanks?|boxcars?|flats?|centerbeams?)/.test(t)&&num&&!/dot/.test(t)){ const old=r.qty; r.qty=parseInt(num[1],10); reply+=`Quantity ${old} → ${r.qty} cars. `; tools.push('update_request','reprice_quote'); changed=true; }
+  if(/pickup/.test(t)){ const d=t.match(/(nov|dec|oct)\w*\s*(\d{1,2})/); if(d){ r.pickup=d[1].charAt(0).toUpperCase()+d[1].slice(1,3)+' '+d[2]; r.missing=r.missing.filter(m=>!/pickup/i.test(m)); reply+=`Pickup set to ${r.pickup}. `; tools.push('update_request'); changed=true; } }
+  if(/dot.?11[17]/.test(t)){ r.carType=/117/.test(t)?'Tank DOT-117':'Tank DOT-111'; if(/117/.test(t)) r.rate=5.60; r.missing=r.missing.filter(m=>!/tank car spec/i.test(m)); reply+=`Car type set to ${r.carType}. `; tools.push('update_request'); changed=true; }
+  if(/(confirm|yes|apply|accept|ok)/.test(t)&&r.missing.some(m=>/geo/i.test(m))){ r.geo=1800; r.geoNote='Laredo border unrest (GDELT)'; r.eta='Nov 19'; r.missing=r.missing.filter(m=>!/geo/i.test(m)); reply+='Geo premium +$1,800 and +2 days applied. '; tools.push('update_request','reprice_quote'); changed=true; }
+  else if(/no geo/.test(t)&&r.missing.some(m=>/geo/i.test(m))){ r.geoNote='skipped by user'; r.missing=r.missing.filter(m=>!/geo/i.test(m)); reply+='Quoting without geo premium. '; tools.push('update_request','reprice_quote'); changed=true; }
+  const q=quote(r);
+  if(changed&&r.missing.length===0){
+    if(r.status==='Needs input'||r.status==='Waiting on shipper'){ r.status='Quoted'; if(r.eta==='—') r.eta=r.needBy; reply+='Everything I need is here. '; }
+    else if(r.status==='Sent'){ r.status='Quoted'; reply+='Quote changed after sending, so status is back to Quoted — say "send" to resend. '; }
+    reply+=`New total ${money(q.total)}, ETA ${r.eta}. Say "send" when ready.`;
+  } else if(changed){ reply+='Still missing: '+r.missing.join('; ')+'.'; }
+  if(/\bsend\b/.test(t)&&!changed){
+    if(r.missing.length){ reply='I can’t send yet — still missing: '+r.missing.join('; ')+'.'; }
+    else { r.status='Sent'; reply=`Quote ${money(q.total)} sent to ${r.contact} with PDF attached. Status → Sent.`; tools.push('render_quote_pdf','send_email','save_request'); }
+  }
+  if(!reply) reply='I can change the fuel surcharge ("set fuel to 10%" / "add 5% fuel"), margin ("margin 8%"), quantity ("make it 10 cars"), fill missing info ("pickup Nov 20", "DOT-117"), confirm a risk premium ("confirm"), or "send" the quote.';
+  r.msgs.push({who:'agent', text:reply, tools:[...new Set(tools)].join(', ')});
+}
+
+function sendText(text){
+  const r=reqs.find(x=>x.id===sel); if(!r||!text.trim()) return;
+  r.msgs.push({who:'user', text:text.trim()}); agent(r,text); render();
+}
+
+function askShipper(){
+  const r=reqs.find(x=>x.id===sel); if(!r||!r.contact) return;
+  const gaps=r.missing.filter(m=>!/geo/i.test(m));
+  r.status='Waiting on shipper';
+  r.msgs.push({who:'agent', text:`Emailed ${r.contact}\nSubject: [RQ-${r.id.slice(2)}] Quote for ${r.qty} tank cars ${r.from} → ${r.to}\nAsked for: ${gaps.join('; ')}.\nStored the outgoing Message-ID so the reply maps back to ${r.id}. Status → Waiting on shipper.`, tools:'draft_gap_questions, send_email, save_request'});
+  render();
+  setTimeout(()=>{
+    r.msgs.push({who:'email', meta:`Email reply from ${r.contact} · In-Reply-To matched → ${r.id} (existing request, no new one created)`, text:r.shipperReply});
+    const before=r.msgs.length; agent(r, r.shipperReply.replace(/\n/g,' '));
+    const m=r.msgs[before]; if(m){ m.text=`Read the shipper’s reply and updated ${r.id} (did not create a new request).\n`+m.text; m.tools='match_request, extract_answers, '+(m.tools||'save_request'); }
+    render();
+  },3000);
+}
+
+// ---------- render ----------
+function render(){
+  const app=document.getElementById('app');
+  if(view==='queue'){
+    const c={total:reqs.length, quoted:reqs.filter(r=>r.status==='Auto-quoted'||r.status==='Quoted').length, input:reqs.filter(r=>r.status==='Needs input'||r.status==='Waiting on shipper').length, sent:reqs.filter(r=>r.status==='Sent').length};
+    app.innerHTML=`
+      <section class="counts">
+        <div class="card count"><b>${c.total}</b><span>received today</span></div>
+        <div class="card count"><b style="color:#1e40af">${c.quoted}</b><span>auto-quoted</span></div>
+        <div class="card count"><b style="color:#b45309">${c.input}</b><span>need input / waiting</span></div>
+        <div class="card count"><b style="color:#166534">${c.sent}</b><span>sent</span></div>
+      </section>
+      <section class="card">
+        <div class="cardhead">Request queue <small>· click a row to open its agent chat</small></div>
+        <div style="overflow-x:auto"><table>
+          <thead><tr><th>Received</th><th>Shipper</th><th>Route</th><th>Cars</th><th>Need by</th><th>Status</th><th>Agent note</th><th class="right">Quote</th></tr></thead>
+          <tbody>${reqs.map(r=>{ const q=quote(r);
+            const note=r.status==='Waiting on shipper'?`Asked ${r.contact} — waiting`:(r.missing.length?'Needs: '+r.missing[0]:(r.status==='Sent'?'Sent to shipper':'Auto-quoted, no issues'));
+            return `<tr data-id="${r.id}"><td class="muted">${r.time}</td><td><button class="linkbtn">${esc(r.shipper)}</button></td><td>${esc(r.from)} → ${esc(r.to)}</td><td>${r.qty} ${esc(r.carType)}</td><td>${r.needBy}</td><td><span class="pill ${pillClass(r.status)}">${r.status}</span></td><td class="muted">${esc(note)}</td><td class="right" style="font-weight:600">${r.missing.length?'—':money(q.total)}</td></tr>`; }).join('')}
+          </tbody></table></div>
+      </section>`;
+    app.querySelectorAll('tbody tr').forEach(tr=>tr.addEventListener('click',()=>{ sel=tr.dataset.id; view='req'; render(); }));
+    return;
+  }
+  const r=reqs.find(x=>x.id===sel), q=quote(r);
+  const geoOnly=r.missing.length&&r.missing.every(m=>/geo/i.test(m));
+  const canAsk=!!r.contact&&r.status!=='Waiting on shipper'&&r.missing.some(m=>!/geo/i.test(m));
+  const hint=r.status==='Waiting on shipper'?'Reply will land in this chat and update this request.':(geoOnly?'This one is your call — answer in the chat below.':'Or answer in the chat below if you already know.');
+  const chips=r.missing.length?(geoOnly?['confirm','no geo']:['pickup Nov 18','DOT-117']):['add 5% fuel','make it 10 cars','margin 8%','send'];
+  app.innerHTML=`
+    <div class="topbar">
+      <button class="btn" id="back">← Queue</button>
+      <div style="font-weight:700;font-size:16px">${esc(r.shipper)}</div>
+      <div class="muted">${r.id} · received ${r.time}</div>
+      <span class="pill ${pillClass(r.status)}">${r.status}</span>
+    </div>
+    <section class="grid2">
+      <div class="card pad">
+        <div style="font-weight:600">Extracted from email <small class="muted" style="font-weight:400;font-size:12px">· junk removed</small></div>
+        <div class="fields">
+          <div><small>Origin</small>${esc(r.from)}</div><div><small>Destination</small>${esc(r.to)}</div><div><small>Commodity</small>${esc(r.commodity)}</div>
+          <div><small>Car type</small>${esc(r.carType)}</div><div><small>Quantity</small>${r.qty}</div><div><small>Pickup → Need by</small>${r.pickup} → ${r.needBy}</div>
+        </div>
+        <div class="email">${esc(r.email)}</div>
+      </div>
+      ${r.missing.length===0?`
+      <div class="card pad" style="gap:5px">
+        <div class="quoteline" style="margin-bottom:2px"><span style="font-weight:600">Quote</span><span class="muted" style="font-size:11px">source of each line →</span></div>
+        <div class="quoteline"><span class="l">Base · ${r.qty} cars × ${r.miles} mi × $${r.rate.toFixed(2)}</span><span class="badge b-ours">OUR TARIFF · DynamoDB</span><span class="v">${money(q.base)}</span></div>
+        <div class="quoteline"><span class="l">Fuel surcharge ${r.fuelPct}% <span class="muted">· diesel $3.89</span></span><span class="badge b-ext">EIA API · weekly</span><span class="v amber">+${money(q.fuel)}</span></div>
+        <div class="quoteline"><span class="l">Weather risk <span class="muted">· ${esc(r.weatherNote)}</span></span><span class="badge b-ext">NWS weather.gov · live</span><span class="v amber">${q.weather?'+'+money(q.weather):'$0'}</span></div>
+        <div class="quoteline"><span class="l">Geo risk <span class="muted">· ${esc(r.geoNote)}</span></span><span class="badge b-ext">GDELT · 15 min</span><span class="v amber">${q.geo?'+'+money(q.geo):'$0'}</span></div>
+        <div class="quoteline"><span class="l">Margin ${r.marginPct}%</span><span class="badge b-ours">OUR RULE</span><span class="v">+${money(q.margin)}</span></div>
+        <div class="total"><span>Total · ETA ${r.eta}</span><span>${money(q.total)}</span></div>
+      </div>`:`
+      <div class="gap">
+        <h4>Not quoted yet — agent needs:</h4>
+        ${r.missing.map(m=>`<div><span class="dot"></span>${esc(m)}</div>`).join('')}
+        <div style="display:flex;align-items:center;gap:10px;margin-top:6px;flex-wrap:wrap">
+          ${canAsk?'<button class="btn btn-amber" id="ask">Ask shipper by email</button>':''}
+          ${r.status==='Waiting on shipper'?`<span class="wait">Email sent to ${esc(r.contact)} · waiting for reply…</span>`:''}
+          <span class="muted" style="font-size:12px">${hint}</span>
+        </div>
+      </div>`}
+    </section>
+    <section class="card" style="display:flex;flex-direction:column;overflow:hidden">
+      <div class="cardhead">Conversation with agent <small>· saved per request</small></div>
+      <div class="msgs">${r.msgs.map(m=>`<div class="row ${m.who==='user'?'user':m.who==='email'?'mail':''}"><div class="bubble">${m.meta?`<div class="meta"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg><span>${esc(m.meta)}</span></div>`:''}${esc(m.text)}${m.tools?`<div class="tools">tools: <code>${esc(m.tools)}</code></div>`:''}</div></div>`).join('')}</div>
+      <div class="composer">
+        <div class="chips">${chips.map(c=>`<button class="chip" data-c="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+        <div class="inputrow"><input id="inp" type="text" placeholder="e.g. add 5% fuel surcharge · pickup Nov 20 · send quote" aria-label="Message to agent"><button class="btn btn-primary" id="send">Send</button></div>
+      </div>
+    </section>`;
+  document.getElementById('back').onclick=()=>{ view='queue'; render(); };
+  const ask=document.getElementById('ask'); if(ask) ask.onclick=askShipper;
+  app.querySelectorAll('.chip').forEach(b=>b.onclick=()=>sendText(b.dataset.c));
+  const inp=document.getElementById('inp');
+  document.getElementById('send').onclick=()=>sendText(inp.value);
+  inp.addEventListener('keydown',e=>{ if(e.key==='Enter') sendText(inp.value); });
+  inp.focus();
+}
+render();
+</script>
+</body>
+</html>

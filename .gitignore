@@ -1,0 +1,33 @@
+# Angular / Node
+node_modules/
+ui/dist/
+ui/.angular/
+*.log
+
+# Java / Maven
+target/
+*.class
+*.jar
+!**/lib/*.jar
+
+# AWS SAM / build output
+.aws-sam/
+build/
+samconfig.toml.bak
+
+# secrets / local config (never commit)
+.env
+.env.*
+*.pem
+aws-credentials*
+
+# IDE / OS
+.vscode/
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+
+# OneDrive temp files
+~$*
+*.tmp
