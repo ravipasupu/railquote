@@ -7,7 +7,7 @@ Diagram: `railquote-aws-architecture.html` (open in a browser).
 - Serverless only: pay per request, $0 when idle.
 - One region: **us-east-1** (Bedrock + SES inbound available, lowest prices).
 - **No VPC, no subnets, no NAT.** Every service is managed with a public AWS endpoint, locked down by IAM + Cognito. A NAT Gateway alone would be ~$32/mo.
-- **Email stays on your existing Outlook address.** An Outlook rule forwards a copy of incoming mail to `ravi@railquote.ai` (SES). The agent sends with `Reply-To` = your Outlook, so shipper replies land in Outlook and are forwarded again. Your arp-labs.ai MX record is never changed.
+- **Email stays on your existing Gmail address.** A Gmail filter forwards a copy of incoming mail to `ravi@railquote.ai` (SES). The agent sends with `Reply-To` = your Gmail, so shipper replies land in Gmail and are forwarded again. Your Gmail is never touched; only the project domain points at SES.
 - New AWS account `railquote`, IAM Identity Center for login (no long-lived keys), Budgets alarm at $5 / $10.
 - Target run cost at demo traffic: **$3–8 / month** (+ domain ~$12–20/yr).
 
@@ -16,17 +16,17 @@ Diagram: `railquote-aws-architecture.html` (open in a browser).
 | Service | Role | Why / cost |
 |---|---|---|
 | Route 53 | `railquote.ai` zone; its MX record points at SES; `app.` record for the UI | Needed to receive email. $0.50/mo + domain |
-| SES inbound + outbound | AWS mail server. Receives the copies Outlook forwards to `ravi@railquote.ai`; sends gap questions and quotes (Reply-To = your Outlook) | Pay per message. Sandbox → request production (free) |
+| SES inbound + outbound | AWS mail server. Receives the copies Gmail forwards to `ravi@railquote.ai`; sends gap questions and quotes (Reply-To = your Gmail) | Pay per message. Sandbox → request production (free) |
 | S3 | `ui` (Angular build), `raw-mail` (.eml, 30-day lifecycle), `quotes` (PDFs) | Pennies |
 | CloudFront + ACM | HTTPS for Angular; S3 stays private via OAC | Free cert, 1 TB/mo free |
 | Cognito | User pool for ops login → JWT | Free ≤ 10k monthly users |
 | API Gateway (HTTP API) | REST endpoints + JWT authorizer | ~70% cheaper than REST API |
 | Lambda (Java 21, arm64, SnapStart) | `requests-api`, `agent-chat`, `email-parser`, `quote-sender`, `signals-fetcher` | Free tier covers demo; SnapStart removes Java cold start |
-| DynamoDB (on-demand) | `requests`, `conversations`, `signals` (TTL 24h), `tariffs` | No idle cost, 25 GB free |
+| DynamoDB (on-demand) | `requests`, `conversations`, `agent_steps` (trace), `history` (audit), `signals` (TTL 24h), `tariffs` | No idle cost, 25 GB free |
 | Amazon Bedrock | Email extraction + agent (Converse API with tool use), Claude Haiku | Only in production; local testing uses Claude session |
 | EventBridge Scheduler | Hourly trigger for `signals-fetcher` | Free tier |
-| SSM Parameter Store | EIA key, config | Free (vs Secrets Manager $0.40/secret) |
-| CloudWatch | Logs (7-day retention), alarms | 5 GB free |
+| SSM Parameter Store | EIA key, config, prompt versions (`/railquote/prompts/agent`) | Free (vs Secrets Manager $0.40/secret) |
+| CloudWatch + X-Ray | Structured JSON logs (7-day retention), custom metrics (`AutoQuoteRate`, `TokensPerRequest`, `BedrockCost`), 4 alarms, request traces — all via Lambda Powertools for Java | Free tier |
 | IAM | One least-privilege role per Lambda | Free |
 
 ### Not used (on purpose)
@@ -36,7 +36,7 @@ VPC / subnets / NAT, RDS/Aurora, Bedrock Agents (managed), Step Functions, ECS/F
 ## Flows
 
 **Email → request (grey path)**
-1. Shipper emails your normal Outlook address. An Outlook rule forwards a copy to `ravi@railquote.ai`.
+1. Shipper emails your normal Gmail address. A Gmail filter forwards a copy to `ravi@railquote.ai`.
 2. SES receipt rule stores the raw `.eml` in S3 `raw-mail`.
 3. S3 event invokes `email-parser`.
 4. Parser strips junk, then: if `In-Reply-To` matches a stored Message-ID or subject has `[RQ-id]` → existing request; else Bedrock classifies new vs reply (low confidence → "Needs input: possible duplicate"). Bedrock extracts fields.
@@ -48,7 +48,7 @@ VPC / subnets / NAT, RDS/Aurora, Bedrock Agents (managed), Step Functions, ECS/F
 8. API Gateway (JWT authorizer) → `requests-api` / `agent-chat`.
 9. `agent-chat` runs the Bedrock tool loop with `requestId` fixed; tools: `get_request`, `update_request`, `get_signals`, `reprice_quote`, `send_email`, `save_message`. Conversation appended to `conversations`.
 10. `quote-sender` renders PDF → S3 `quotes` → SES sends to shipper.
-11. Shipper receives (Reply-To = your Outlook); their reply lands in Outlook, is forwarded, and maps to the same request.
+11. Shipper receives (Reply-To = your Gmail); their reply lands in Gmail, is forwarded, and maps to the same request.
 
 **Signals**
 12. EventBridge hourly → `signals-fetcher` → EIA (diesel), NWS (alerts), GDELT (events) → `signals` table.
@@ -69,9 +69,23 @@ VPC / subnets / NAT, RDS/Aurora, Bedrock Agents (managed), Step Functions, ECS/F
 | Table | Key | Notes |
 |---|---|---|
 | `requests` | `pk=REQ#<id>` | fields, missing[], status, quote, messageIds[] |
-| `conversations` | `pk=REQ#<id>`, `sk=<timestamp>` | who (agent/user/email), text, tools |
+| `conversations` | `pk=REQ#<id>`, `sk=<timestamp>` | who (agent/user/email), text, decision, reason, promptVersion |
+| `agent_steps` | `pk=REQ#<id>`, `sk=<timestamp>#<n>` | tool, input summary, output summary, ms, tokens, cost — one row per tool call |
+| `history` | `pk=REQ#<id>`, `sk=<timestamp>` | field, old, new, by (agent / user sub / shipper email) |
 | `signals` | `pk=SIGNAL#<type>#<region>` | value, source, fetchedAt, TTL 24h |
 | `tariffs` | `pk=TARIFF#<carType>` | rate per car-mile, surcharge rules |
+
+## Audit & observability (what the demo shows)
+
+| In the UI | Backed by | How |
+|---|---|---|
+| Trace under each agent message (tool, ms, tokens, $) + decision chip + reason | `agent_steps` | Written inside the Bedrock tool loop; final answer must return `decision` + `reason` |
+| History per request (old → new, by whom) | `history` | `update_request` writes a diff row; approvals logged with the Cognito user |
+| Cost per request / day | `agent_steps.tokens` × Bedrock price | Also emitted as `BedrockCost` metric |
+| Agent activity page (auto-quote %, time to quote, tokens/request, alarms) | CloudWatch custom metrics | Powertools `@Metrics`; alarms: cost > $1/day, tokens > 8k, auto-quote < 40%, parse failures |
+| Policy checks (geo needs human; never guess missing fields; margin > 3% needs approval) | Code in the agent Lambda | Checked before `send_email`; each check logs a trace step PASSED / BLOCKED |
+| Prompt version on every trace | SSM Parameter Store | Trace records which prompt version ran |
+| Request timeline across services | X-Ray | Powertools `@Tracing` |
 
 ## External APIs
 

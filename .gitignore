@@ -31,3 +31,6 @@ Thumbs.db
 # OneDrive temp files
 ~$*
 *.tmp
+
+# local working rules, never published
+CLAUDE.md

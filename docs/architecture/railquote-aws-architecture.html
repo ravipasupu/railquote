@@ -70,7 +70,7 @@
 
         <rect x="1508" y="236" width="140" height="150" rx="8" fill="none" stroke="currentColor" stroke-dasharray="5 4" opacity=".7"/>
         <use href="#ic-mail" x="1556" y="252" width="44" height="44"/>
-        <text x="1578" y="318" text-anchor="middle" font-weight="600">Your Outlook</text>
+        <text x="1578" y="318" text-anchor="middle" font-weight="600">Your Gmail</text>
         <text x="1578" y="333" text-anchor="middle" opacity=".7">existing address</text>
         <text x="1578" y="350" text-anchor="middle" opacity=".7">rule: forward a copy</text>
         <text x="1578" y="364" text-anchor="middle" opacity=".7">to ravi@railquote.ai</text>
@@ -148,18 +148,21 @@
 
         <!-- Data -->
         <rect x="540" y="512" width="604" height="160" rx="8" fill="none" stroke="currentColor" opacity=".55"/>
-        <text x="552" y="530" font-weight="600">Data — DynamoDB on-demand (no servers, pennies at this scale)</text>
-        <use href="#ic-ddb" x="560" y="552" width="44" height="44"/><text x="560" y="616" font-weight="600">requests</text><text x="560" y="631" opacity=".7">pk=REQ#id</text>
-        <use href="#ic-ddb" x="690" y="552" width="44" height="44"/><text x="690" y="616" font-weight="600">conversations</text><text x="690" y="631" opacity=".7">pk=REQ#id sk=ts</text>
-        <use href="#ic-ddb" x="820" y="552" width="44" height="44"/><text x="820" y="616" font-weight="600">signals</text><text x="820" y="631" opacity=".7">TTL 24h</text>
-        <use href="#ic-ddb" x="930" y="552" width="44" height="44"/><text x="930" y="616" font-weight="600">tariffs</text><text x="930" y="631" opacity=".7">rate per car-mile</text>
-        <use href="#ic-s3" x="1050" y="552" width="44" height="44"/><text x="1050" y="616" font-weight="600">S3 · quotes</text><text x="1050" y="631" opacity=".7">PDFs</text>
+        <text x="552" y="530" font-weight="600">Data — DynamoDB on-demand <tspan font-weight="400" opacity=".7">(no servers; every agent step and change is a row here)</tspan></text>
+        <use href="#ic-ddb" x="556" y="552" width="40" height="40"/><text x="556" y="614" font-weight="600">requests</text><text x="556" y="629" opacity=".7">pk=REQ#id</text>
+        <use href="#ic-ddb" x="642" y="552" width="40" height="40"/><text x="642" y="614" font-weight="600">signals</text><text x="642" y="629" opacity=".7">TTL 24h</text>
+        <use href="#ic-ddb" x="724" y="552" width="40" height="40"/><text x="724" y="614" font-weight="600">conversations</text><text x="724" y="629" opacity=".7">sk=timestamp</text>
+        <use href="#ic-ddb" x="826" y="552" width="40" height="40"/><text x="826" y="614" font-weight="600">agent_steps</text><text x="826" y="629" opacity=".7">tool · ms · tokens · $</text>
+        <use href="#ic-ddb" x="938" y="552" width="40" height="40"/><text x="938" y="614" font-weight="600">history</text><text x="938" y="629" opacity=".7">old → new · by</text>
+        <use href="#ic-ddb" x="1032" y="552" width="40" height="40"/><text x="1032" y="614" font-weight="600">tariffs</text><text x="1032" y="629" opacity=".7">$/car-mile</text>
+        <use href="#ic-s3" x="1104" y="552" width="28" height="28"/><text x="1098" y="598" font-weight="600" font-size="11">S3 quotes</text>
 
         <!-- Ops -->
         <rect x="1170" y="512" width="274" height="160" rx="8" fill="none" stroke="currentColor" opacity=".55"/>
         <text x="1182" y="530" font-weight="600">Ops</text>
-        <use href="#ic-cw" x="1190" y="546" width="44" height="44"/><text x="1246" y="564" font-weight="600">CloudWatch</text><text x="1246" y="579" opacity=".7">logs 7-day retention, alarms</text>
-        <use href="#ic-ssm" x="1190" y="610" width="44" height="44"/><text x="1246" y="628" font-weight="600">SSM Parameter Store</text><text x="1246" y="643" opacity=".7">EIA key, config · free tier</text>
+        <use href="#ic-cw" x="1190" y="542" width="36" height="36"/><text x="1238" y="556" font-weight="600">CloudWatch + X-Ray</text><text x="1238" y="570" opacity=".7">JSON logs · metrics: AutoQuoteRate,</text><text x="1238" y="584" opacity=".7">TokensPerRequest · alarms · traces</text>
+        <use href="#ic-ssm" x="1190" y="596" width="36" height="36"/><text x="1238" y="610" font-weight="600">SSM Parameter Store</text><text x="1238" y="624" opacity=".7">EIA key · prompt versions</text>
+        <text x="1190" y="656" opacity=".7">Powertools: @Logging @Tracing @Metrics</text>
 
         <!-- network / AZ note -->
         <text x="270" y="700" opacity=".75">No VPC, no subnets, no NAT: every service above is managed, has a public AWS endpoint, and is protected by IAM + Cognito. Saves ≈ $32/mo.</text>
@@ -178,11 +181,11 @@
         <!-- 4 parser -> Bedrock (extract / match reply) -->
         <path d="M912 312 V 408"/>
         <!-- 5 agent core -> DynamoDB requests -->
-        <path d="M912 452 V 500 H 582 V 552"/>
+        <path d="M912 452 V 500 H 576 V 552"/>
         <!-- 12 scheduler -> fetcher -> external APIs -> signals table -->
         <path d="M322 590 V 610"/>
         <path d="M300 632 H 224"/>
-        <path d="M344 632 H 520 V 574 H 560"/>
+        <path d="M344 632 H 520 V 545 H 662 V 552"/>
       </g>
       <!-- user flows in blue -->
       <g fill="none" stroke="#1d4ed8" stroke-width="1.6" marker-end="url(#arr-b)">
@@ -197,10 +200,10 @@
         <path d="M604 312 L 700 386"/>
         <!-- 9 agent-chat -> Bedrock tool loop; agent -> conversations -->
         <path d="M744 408 H 890"/>
-        <path d="M722 452 V 552"/>
+        <path d="M722 452 V 520 H 744 V 552"/>
         <!-- 10 agent -> quote-sender -> S3 quotes -> SES out (hops above icons) -->
         <path d="M926 408 V 398 H 1160 V 406"/>
-        <path d="M1162 452 V 500 H 1072 V 552"/>
+        <path d="M1162 452 V 500 H 1118 V 552"/>
         <path d="M1186 408 V 398 H 1340 V 406"/>
         <!-- 11 SES out -> shipper -->
         <path d="M1374 430 H 1790 V 294 H 1768" stroke-dasharray="6 4"/>
@@ -213,7 +216,7 @@
         <g><circle cx="1212" cy="258" r="9" fill="currentColor"/><text x="1212" y="262" fill="var(--card)">2</text></g>
         <g><circle cx="1012" cy="258" r="9" fill="currentColor"/><text x="1012" y="262" fill="var(--card)">3</text></g>
         <g><circle cx="912" cy="360" r="9" fill="currentColor"/><text x="912" y="364" fill="var(--card)">4</text></g>
-        <g><circle cx="750" cy="500" r="9" fill="currentColor"/><text x="750" y="504" fill="var(--card)">5</text></g>
+        <g><circle cx="700" cy="500" r="9" fill="currentColor"/><text x="700" y="504" fill="var(--card)">5</text></g>
         <g><circle cx="200" cy="300" r="9" fill="#1d4ed8"/><text x="200" y="304" fill="#fff">6</text></g>
         <g><circle cx="250" cy="430" r="9" fill="#1d4ed8"/><text x="250" y="434" fill="#fff">7</text></g>
         <g><circle cx="360" cy="470" r="9" fill="#1d4ed8"/><text x="360" y="474" fill="#fff">8</text></g>
@@ -224,8 +227,8 @@
       </g>
     </svg>
     <figcaption>
-      <strong>Grey = email/agent path.</strong> 1 shipper emails your normal Outlook address → 1b an Outlook rule forwards a copy to ravi@railquote.ai (SES) → 2 SES stores raw .eml in S3 → 3 S3 event runs email-parser → 4 Bedrock extracts the order, or matches a reply to its existing request (In-Reply-To / [RQ-id]) → 5 request saved; auto-quote if no gaps.
-      <strong>Blue = ops path.</strong> 6 browser loads Angular from CloudFront/S3 → 7 Cognito login → 8 API Gateway (JWT) → requests-api / agent-chat → 9 agent-chat runs the Bedrock tool loop (update_request, reprice_quote…) and saves the conversation → 10 quote-sender renders PDF to S3, SES sends → 11 shipper receives (Reply-To = your Outlook); their reply lands in Outlook, is forwarded again, and maps to the same request.
+      <strong>Grey = email/agent path.</strong> 1 shipper emails your normal Gmail address → 1b a Gmail filter forwards a copy to ravi@railquote.ai (SES) → 2 SES stores raw .eml in S3 → 3 S3 event runs email-parser → 4 Bedrock extracts the order, or matches a reply to its existing request (In-Reply-To / [RQ-id]) → 5 request saved; auto-quote if no gaps.
+      <strong>Blue = ops path.</strong> 6 browser loads Angular from CloudFront/S3 → 7 Cognito login → 8 API Gateway (JWT) → requests-api / agent-chat → 9 agent-chat runs the Bedrock tool loop (update_request, reprice_quote…) and saves the conversation → 10 quote-sender renders PDF to S3, SES sends → 11 shipper receives (Reply-To = your Gmail); their reply lands in Gmail, is forwarded again, and maps to the same request.
       <strong>12</strong> EventBridge runs signals-fetcher hourly → EIA / NWS / GDELT → signals table.
     </figcaption>
   </figure>
@@ -291,20 +294,34 @@
   <table>
     <thead><tr><th>Service</th><th>Used for</th><th>Why this one (cost / simplicity)</th><th>Est. $/mo</th></tr></thead>
     <tbody>
-      <tr><td>Route 53</td><td>Domain <code>railquote.ai</code>; its MX record points at SES (your arp-labs.ai MX is never touched); <code>app.</code> record for the UI</td><td>Required for email receiving. Domain ≈ $12–20/yr</td><td>0.50 + domain</td></tr>
-      <tr><td>SES (inbound + outbound)</td><td>Receive the copies your Outlook rule forwards; send gap questions and quotes (Reply-To = your Outlook)</td><td>AWS's mail server: SMTP/API for sending, MX-based receiving. Pay per message. Starts in sandbox → request production access (free)</td><td>&lt; 0.10</td></tr>
+      <tr><td>Route 53</td><td>Domain <code>railquote.ai</code>; its MX record points at SES (your Gmail is never touched); <code>app.</code> record for the UI</td><td>Required for email receiving. Domain ≈ $12–20/yr</td><td>0.50 + domain</td></tr>
+      <tr><td>SES (inbound + outbound)</td><td>Receive the copies your Gmail filter forwards; send gap questions and quotes (Reply-To = your Gmail)</td><td>AWS's mail server: SMTP/API for sending, MX-based receiving. Pay per message. Starts in sandbox → request production access (free)</td><td>&lt; 0.10</td></tr>
       <tr><td>S3</td><td>Angular build, raw .eml, quote PDFs</td><td>Pennies; lifecycle rule deletes raw mail after 30 days</td><td>&lt; 0.10</td></tr>
       <tr><td>CloudFront + ACM</td><td>HTTPS for the Angular app</td><td>Free cert; 1 TB/mo free tier; S3 stays private (OAC)</td><td>0</td></tr>
       <tr><td>Cognito</td><td>Login for you / ops users, JWT for API</td><td>Free for first 10k monthly users; no auth code to write</td><td>0</td></tr>
       <tr><td>API Gateway — HTTP API</td><td>REST endpoints for Angular</td><td>HTTP API is ~70% cheaper than REST API and has a built-in JWT authorizer</td><td>&lt; 0.10</td></tr>
       <tr><td>Lambda (Java 21, arm64, SnapStart)</td><td>requests-api, agent-chat, email-parser, quote-sender, signals-fetcher</td><td>1M requests + 400k GB-s free per month, forever. SnapStart kills Java cold start. arm64 is 20% cheaper</td><td>0</td></tr>
-      <tr><td>DynamoDB (on-demand)</td><td>requests, conversations, signals (TTL), tariffs</td><td>No servers, no idle cost; 25 GB free. Perfect fit for key lookups by requestId</td><td>&lt; 0.50</td></tr>
+      <tr><td>DynamoDB (on-demand)</td><td>requests, conversations, <strong>agent_steps</strong> (trace), <strong>history</strong> (audit), signals (TTL), tariffs</td><td>No servers, no idle cost; 25 GB free. Perfect fit for key lookups by requestId</td><td>&lt; 0.50</td></tr>
       <tr><td>Amazon Bedrock</td><td>Email extraction + the agent (Converse API with tools)</td><td>Claude Haiku for extraction &amp; agent — cheapest; only called in production, never for local testing</td><td>1–5</td></tr>
       <tr><td>EventBridge Scheduler</td><td>Hourly trigger for signals-fetcher</td><td>14M invocations free</td><td>0</td></tr>
-      <tr><td>SSM Parameter Store</td><td>EIA API key, config</td><td>Standard params are free (Secrets Manager is $0.40/secret)</td><td>0</td></tr>
-      <tr><td>CloudWatch</td><td>Logs (7-day retention), 2–3 alarms, Budgets</td><td>5 GB logs free; set retention so logs never pile up</td><td>&lt; 0.50</td></tr>
+      <tr><td>SSM Parameter Store</td><td>EIA API key, config, <strong>prompt versions</strong> (agent-v3, extract-v2)</td><td>Standard params are free (Secrets Manager is $0.40/secret)</td><td>0</td></tr>
+      <tr><td>CloudWatch + X-Ray</td><td>Structured JSON logs (7-day retention), custom metrics (AutoQuoteRate, TokensPerRequest, BedrockCost), 4 alarms, request traces</td><td>5 GB logs, 10 metrics, 10 alarms, 100k traces free — all via Lambda Powertools for Java annotations</td><td>&lt; 0.50</td></tr>
       <tr><td>IAM / IAM Identity Center</td><td>One role per Lambda; your admin login</td><td>Free. No long-lived access keys on your PC — use SSO login</td><td>0</td></tr>
       <tr><td colspan="3"><strong>Total at demo traffic</strong> (≈ 50 emails/day, 1–2 users)</td><td><strong>≈ $3–8</strong></td></tr>
+    </tbody>
+  </table>
+
+  <h2>Audit &amp; observability — what a demo viewer sees, and where it comes from</h2>
+  <table>
+    <thead><tr><th>In the UI</th><th>Backed by</th><th>How it gets there</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Trace</strong> under every agent message — each tool call with duration, tokens, cost; a decision chip (AUTO-QUOTED / NEEDS HUMAN / RE-QUOTED / SENT) and the reason</td><td>DynamoDB <code>agent_steps</code> (pk=REQ#id, sk=timestamp)</td><td>The agent-chat / email-parser Lambda writes one row per tool call inside the Bedrock tool loop; the agent's final answer must include <code>decision</code> + <code>reason</code> (enforced by the tool schema)</td></tr>
+      <tr><td><strong>History</strong> on each request — every field change, old → new, by whom (agent / Ravi / shipper email)</td><td>DynamoDB <code>history</code></td><td><code>update_request</code> tool writes a diff row on every change; human approvals (send, confirm) are logged with the user from the Cognito JWT</td></tr>
+      <tr><td><strong>Cost per request / per day</strong></td><td><code>agent_steps.tokens</code> × Bedrock price</td><td>Computed in the API; also emitted as the <code>BedrockCost</code> CloudWatch metric</td></tr>
+      <tr><td><strong>Agent activity page</strong> — % auto-quoted, % needed human, avg time, tokens/request, alarms</td><td>CloudWatch custom metrics + DynamoDB counts</td><td>Lambda Powertools <code>@Metrics</code> publishes <code>AutoQuoteRate</code>, <code>TimeToQuoteMs</code>, <code>TokensPerRequest</code>; alarms: cost &gt; $1/day, tokens &gt; 8k, auto-quote &lt; 40%, parse failures</td></tr>
+      <tr><td><strong>Policy checks</strong> — geo premium needs a human; missing fields → ask, never guess; margin change &gt; 3% needs approval</td><td>Code in the agent Lambda (not the prompt)</td><td>Checked before the agent is allowed to call <code>send_email</code>; each check writes a trace step <code>policy:… → PASSED / BLOCKED</code></td></tr>
+      <tr><td><strong>Prompt version</strong> on every trace</td><td>SSM Parameter Store</td><td>Prompts live in SSM as <code>/railquote/prompts/agent</code> with a version; the trace records which version ran, so results are comparable after a prompt change</td></tr>
+      <tr><td><strong>Request timeline</strong> (API Gateway → Lambda → Bedrock → DynamoDB → SES)</td><td>AWS X-Ray</td><td>Lambda Powertools <code>@Tracing</code>; shows which hop was slow</td></tr>
     </tbody>
   </table>
 
