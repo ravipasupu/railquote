@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How the RailQuote agent works</title>
+<meta name="description" content="How RailQuote's AI agent works: a Bedrock Converse tool loop in one Java Lambda — one message, four rounds, every tool call traced.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#ffffff;--fg:#0f172a;--muted:#475569;--line:#e2e8f0;--soft:#f8fafc;--accent:#1d4ed8;--dark:#0f172a;--panel:#111a2e;--panel-line:#1f2a44;--dark-fg:#e5e7eb;--dark-muted:#94a3b8;--dark-accent:#93c5fd}
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#0b1220;--fg:#e5e7eb;--muted:#9ca3af;--line:#1f2a44;--soft:#111a2e;--accent:#60a5fa;--dark:#060b16}}
+  :root[data-theme="dark"]{--bg:#0b1220;--fg:#e5e7eb;--muted:#9ca3af;--line:#1f2a44;--soft:#111a2e;--accent:#60a5fa;--dark:#060b16}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 Inter,system-ui,-apple-system,"Segoe UI",sans-serif}
+  a{color:var(--accent)}
+  .wrap{max-width:1040px;margin:0 auto;padding-left:24px;padding-right:24px}
+  nav{display:flex;flex-wrap:wrap;align-items:center;gap:16px;padding-top:18px;padding-bottom:18px}
+  nav .name{font-weight:800;font-size:16px;text-decoration:none;color:var(--fg)}
+  nav .sep{color:#94a3b8}nav .here{font-weight:600}
+  nav .sp{flex:1 1 auto}
+  nav a.l{text-decoration:none;color:var(--fg);font-weight:500;opacity:.85}
+  .eyebrow{font-size:13px;font-weight:600;color:var(--accent);letter-spacing:.08em;text-transform:uppercase}
+  header.hero{padding-top:40px;padding-bottom:28px;display:flex;flex-direction:column;gap:14px}
+  h1{margin:0;font-size:clamp(28px,4vw,38px);line-height:1.15;font-weight:800;letter-spacing:-.02em}
+  .lead{margin:0;font-size:17px;color:var(--muted);max-width:680px}
+  .three{padding-bottom:40px;display:grid;grid-template-columns:1fr 48px 1fr 48px 1fr;align-items:stretch}
+  .box{border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+  .box.mid{background:var(--soft)}
+  .box b{font-weight:700}.box span{font-size:14px;color:var(--muted)}
+  .box code{font-size:13px;line-height:1.7;font-family:ui-monospace,Menlo,Consolas,monospace}
+  .arrow{display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:22px}
+  .band{background:var(--dark);color:#fff}
+  .band .wrap{padding-top:36px;padding-bottom:40px;display:flex;flex-direction:column;gap:18px}
+  .band .eyebrow{color:var(--dark-accent)}
+  .intro{display:flex;flex-wrap:wrap;align-items:baseline;gap:14px;color:#cbd5e1}
+  .pill{background:#1d4ed8;color:#fff;padding:2px 10px;border-radius:999px;font-weight:600}
+  .tabs{display:flex;gap:6px;flex-wrap:wrap}
+  .tabs button{font:inherit;font-size:13px;font-weight:600;padding:8px 14px;border-radius:999px;cursor:pointer;border:1px solid #334155;background:transparent;color:#cbd5e1}
+  .tabs button.on{border-color:#60a5fa;background:#1d4ed8;color:#fff}
+  .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+  .panel{background:var(--panel);border:1px solid var(--panel-line);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:8px}
+  .panel .h{font-size:12px;font-weight:600;color:var(--dark-accent);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:10px}
+  .panel pre{margin:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.6;color:var(--dark-fg);white-space:pre-wrap}
+  .panel .does{color:var(--dark-fg);white-space:pre-line}
+  .stop{font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;background:#1e3a8a;color:#bfdbfe}
+  .stop.end{background:#14532d;color:#bbf7d0}
+  .trace{display:grid;grid-template-columns:22px 150px 1fr 70px 70px;gap:3px 10px;font-size:12px;font-family:ui-monospace,Menlo,monospace}
+  .trace .n,.trace .r{color:var(--dark-muted)}.trace .r{text-align:right}.trace .t{color:var(--dark-accent);font-weight:600}.trace .d{color:#cbd5e1}
+  .ctl{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .ctl button{font:inherit;padding:9px 14px;border-radius:8px;cursor:pointer;font-weight:600}
+  .ctl .prev{border:1px solid #334155;background:transparent;color:#e5e7eb}
+  .ctl .next{border:0;background:#1d4ed8;color:#fff}
+  .ctl .note{color:var(--dark-muted);font-size:13px}
+  section.loop{padding-top:44px;padding-bottom:24px;display:flex;flex-direction:column;gap:14px}
+  .code{border:1px solid var(--line);border-radius:12px;overflow:hidden;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)}
+  .code pre{margin:0;padding:18px 20px;background:var(--soft);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.75;overflow-x:auto}
+  .code .ex{padding:18px 20px;display:flex;flex-direction:column;gap:8px;font-size:13.5px;color:var(--muted);line-height:1.75}
+  .code .ex b{color:var(--fg)}
+  section.why{padding-top:24px;padding-bottom:56px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+  .why > div{display:flex;flex-direction:column;gap:10px}
+  .card{border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:8px;font-size:14px;color:var(--muted)}
+  .card b{color:var(--fg)}
+  .btn{margin-top:4px;text-decoration:none;background:var(--accent);color:#fff;font-weight:600;padding:10px 16px;border-radius:8px;align-self:flex-start}
+  footer{border-top:1px solid var(--line)}
+  footer .wrap{padding:24px;font-size:13px;color:var(--muted);display:flex;flex-wrap:wrap;gap:16px}
+  @media (max-width:860px){.three{grid-template-columns:1fr}.arrow{transform:rotate(90deg);padding:4px 0}.two,.code,.why{grid-template-columns:1fr}.trace{grid-template-columns:22px 120px 1fr}.trace .r{display:none}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav aria-label="Main">
+    <a class="name" href="../">Raviteja Pasupuleti</a>
+    <span class="sep">/</span>
+    <span class="here">RailQuote · How the agent works</span>
+    <span class="sp"></span>
+    <a class="l" href="mock.html">Interactive mock</a>
+    <a class="l" href="architecture.html">Architecture</a>
+    <a class="l" href="https://github.com/ravipasupu/railquote" target="_blank" rel="noopener">Source</a>
+  </nav>
+</div>
+
+<header class="wrap hero">
+  <div class="eyebrow">How the agent works</div>
+  <h1>The model can only talk. Our code does the work.</h1>
+  <p class="lead">Claude (on Amazon Bedrock) cannot read a database or send an email. So we hand it a short <strong>menu of tools</strong> — functions it may ask us to run. It asks, we run, we report back, repeat — until it gives a final answer. That loop lives in one Java Lambda, and that is the whole agent.</p>
+</header>
+
+<section class="wrap three" aria-label="The three parts">
+  <div class="box"><b>Our Lambda (Java 21)</b><span>Runs the loop. Calls Bedrock, runs tools, writes the trace, enforces policies, saves the result.</span></div>
+  <div class="arrow" aria-hidden="true">⇄</div>
+  <div class="box mid"><b>Claude · Bedrock Converse API</b><span>Reads the request + tool menu. Replies either "run this tool" or "here is my answer". Never touches data.</span></div>
+  <div class="arrow" aria-hidden="true">⇄</div>
+  <div class="box"><b>Tools (the menu)</b><code>get_request<br>update_request<br>reprice_quote<br>send_email<br>final_answer</code></div>
+</section>
+
+<section class="band" id="rounds" aria-label="One message, four rounds">
+  <div class="wrap">
+    <div class="intro"><span class="eyebrow">One message, four rounds</span><span>Ravi types <span class="pill">add 5% fuel</span> on request R-1043. Click through what happens.</span></div>
+    <div class="tabs" id="tabs"></div>
+    <div class="two">
+      <div class="panel"><div class="h">1 · We send to Claude</div><pre id="send"></pre></div>
+      <div class="panel"><div class="h">2 · Claude replies <span class="stop" id="stop"></span></div><pre id="reply"></pre></div>
+    </div>
+    <div class="panel"><div class="h">3 · Our code does</div><div class="does" id="does"></div></div>
+    <div class="panel"><div class="h">Trace so far <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#94a3b8">— exactly what the Trace button shows in the app</span></div><div class="trace" id="trace"></div></div>
+    <div class="ctl"><button class="prev" id="prev">← Previous</button><button class="next" id="next">Next round →</button><span class="note">4 calls to Bedrock · 3 tools run · ≈ 2 s · ≈ $0.004</span></div>
+  </div>
+</section>
+
+<section class="wrap loop" aria-label="The loop in Java">
+  <div class="eyebrow">The loop, in Java — 12 lines</div>
+  <div class="code">
+<pre>while (true) {
+  var res = bedrock.converse(messages, tools);
+  trace.tokens += res.usage();
+
+  if (res.stopReason() == END_TURN) break;
+
+  for (var call : res.toolCalls()) {
+    policy.check(call);
+    var out = tools.run(call);
+    trace.add(call, out);
+    messages.add(toolResult(call.id(), out));
+  }
+}</pre>
+    <div class="ex">
+      <div><b>converse</b> — one AWS API call: prompt + history + tool menu in, Claude's reply out. Same format for every model.</div>
+      <div><b>usage</b> — Bedrock returns input/output token counts on every call; that is where the cost figure comes from.</div>
+      <div><b>END_TURN</b> — Claude says "I'm done". The other value, <b>TOOL_USE</b>, means "run something and come back".</div>
+      <div><b>policy.check</b> — our rules, in code: geo premium needs a human; never guess missing fields; margin &gt; 3% needs approval.</div>
+      <div><b>tools.run</b> — plain Java: DynamoDB read/write, the pricing formula, SES send.</div>
+      <div><b>trace.add</b> — one row per tool call → the <i>agent_steps</i> table → the Trace button.</div>
+      <div><b>toolResult</b> — the answer goes back under the same <i>toolUseId</i>, so Claude knows which question it answers.</div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap why" aria-label="Why this way">
+  <div>
+    <div class="eyebrow">Why our own loop, not Bedrock Agents</div>
+    <div class="card">
+      <div><b>Every tool call passes through our code</b> — so tracing, cost, history and policy checks are a few lines in the loop, not prompt wishes.</div>
+      <div><b>Fewer moving parts</b> — one Lambda and one API call, instead of action groups, OpenAPI schemas, aliases and versions to configure.</div>
+      <div><b>Cheaper and portable</b> — no managed-agent overhead, no knowledge base; the loop works with any model.</div>
+      <div>Bedrock Agents is the right call for many agents, large document RAG, or when you want AWS to own orchestration.</div>
+    </div>
+  </div>
+  <div>
+    <div class="eyebrow">What it gives the user</div>
+    <div class="card">
+      <div><b>Trace</b> — every tool call, with time, tokens and cost, under each agent message.</div>
+      <div><b>Decision + reason</b> — AUTO-QUOTED / NEEDS HUMAN / RE-QUOTED / SENT, always with a why.</div>
+      <div><b>History</b> — every field change, old → new, by agent, by Ravi, or by the shipper's email.</div>
+      <div><b>Human in the loop</b> — the agent cannot send a quote past a policy; a person approves.</div>
+      <a class="btn" href="mock.html">Try it in the interactive mock</a>
+    </div>
+  </div>
+</section>
+
+<footer><div class="wrap"><span>RailQuote is a personal learning project by Raviteja Pasupuleti.</span><a href="../">← Back to portfolio</a></div></footer>
+
+<script>
+const S1={n:1,tool:'get_request',note:'DynamoDB read: R-1043',ms:'30 ms',tokens:'—'};
+const S2={n:2,tool:'update_request',note:'fuelPct 8 → 13 · history row written',ms:'35 ms',tokens:'—'};
+const S3={n:3,tool:'reprice_quote',note:'tariff × miles × cars + surcharges',ms:'20 ms',tokens:'—'};
+const S4={n:4,tool:'final_answer',note:'decision RE-QUOTED · 4 calls · 2,140 tokens',ms:'—',tokens:'2,140'};
+const ROUNDS=[
+ {label:'Round 1',stop:'tool_use',
+  send:'system:  "You are RailQuote’s pricing agent for R-1043.\n          Never create requests. Finish with final_answer."\ntools:   get_request, update_request, reprice_quote,\n          send_email, final_answer\nuser:    "add 5% fuel"',
+  reply:'text:    "Let me check the request first."\ntoolUse: get_request({ requestId: "R-1043" })\n          toolUseId: tu_01',
+  does:'stopReason is tool_use, so we are not done.\nRun get_request → read DynamoDB → { fuelPct: 8, qty: 4, miles: 410, … }\nWrite trace row 1. Add the result to the conversation and call Bedrock again.',
+  trace:[S1]},
+ {label:'Round 2',stop:'tool_use',
+  send:'… everything from round 1, plus:\ntoolResult (tu_01): { fuelPct: 8, qty: 4, miles: 410,\n                      rate: 5.60, missing: [] }',
+  reply:'text:    "Fuel is 8%; you asked for +5 → 13%."\ntoolUse: update_request({ requestId: "R-1043",\n                          fields: { fuelPct: 13 } })\n          toolUseId: tu_02',
+  does:'policy.check: fuel change is allowed without approval → PASSED.\nRun update_request → DynamoDB write → history row "fuelPct 8 → 13, by agent (asked by Ravi)".\nWrite trace row 2. Call Bedrock again.',
+  trace:[S1,S2]},
+ {label:'Round 3',stop:'tool_use',
+  send:'… plus:\ntoolResult (tu_02): { ok: true }',
+  reply:'toolUse: reprice_quote({ requestId: "R-1043" })\n          toolUseId: tu_03',
+  does:'Run reprice_quote → base $9,184 + fuel 13% + weather $0 + geo $0 + margin 6% = $11,001.\nWrite trace row 3. Call Bedrock again.',
+  trace:[S1,S2,S3]},
+ {label:'Round 4 · done',stop:'end_turn',
+  send:'… plus:\ntoolResult (tu_03): { total: 11001, eta: "Nov 20" }',
+  reply:'toolUse: final_answer({\n  decision: "RE-QUOTED",\n  reason:   "change applied on Ravi’s instruction; all fields present",\n  text:     "Fuel surcharge 8% → 13%. New total $11,001.\n             Say ‘send’ when ready." })\nstopReason: end_turn',
+  does:'stopReason is end_turn → leave the loop.\nSave the message + decision + reason + token totals to the conversations table.\nReturn to Angular: the chat shows the reply, the decision chip, and the Trace button.',
+  trace:[S1,S2,S3,S4]}
+];
+let i=0;
+const esc=s=>String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function show(){
+  const r=ROUNDS[i];
+  document.getElementById('tabs').innerHTML=ROUNDS.map((x,k)=>`<button class="${k===i?'on':''}" data-k="${k}">${x.label}</button>`).join('');
+  document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{i=+b.dataset.k;show();});
+  document.getElementById('send').textContent=r.send;
+  document.getElementById('reply').textContent=r.reply;
+  const st=document.getElementById('stop'); st.textContent='stopReason: '+r.stop; st.className='stop'+(r.stop==='end_turn'?' end':'');
+  document.getElementById('does').textContent=r.does;
+  document.getElementById('trace').innerHTML=r.trace.map(s=>`<span class="n">${s.n}</span><span class="t">${s.tool}</span><span class="d">${esc(s.note)}</span><span class="r">${s.ms}</span><span class="r">${s.tokens}</span>`).join('');
+  document.getElementById('next').textContent=i===ROUNDS.length-1?'Start over':'Next round →';
+}
+document.getElementById('prev').onclick=()=>{i=Math.max(0,i-1);show();};
+document.getElementById('next').onclick=()=>{i=(i+1)%ROUNDS.length;show();};
+show();
+</script>
+</body>
+</html>
